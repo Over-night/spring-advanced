@@ -33,4 +33,5 @@ spring:
           lob:
             non_contextual_creation: true
 jwt:
-  secret: ${JWT_SECRET_KEY}
+  secret:
+    key: ${JWT_SECRET_KEY}
