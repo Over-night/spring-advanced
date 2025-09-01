@@ -44,14 +44,8 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public List<CommentResponse> getComments(long todoId) {
-        List<Comment> commentList = commentRepository.findByTodoIdWithUser(todoId);
-
-        List<CommentResponse> dtoList = new ArrayList<>();
-        for (Comment comment : commentList) {
-            User user = comment.getUser();
-            CommentResponse dto = CommentResponse.of(comment, UserResponse.of(user));
-            dtoList.add(dto);
-        }
-        return dtoList;
+        return commentRepository.findByTodoIdWithUser(todoId).stream()
+                .map(comment -> CommentResponse.of(comment, UserResponse.of(comment.getUser())))
+                .toList();
     }
 }
