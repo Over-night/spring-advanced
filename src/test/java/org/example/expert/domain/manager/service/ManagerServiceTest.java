@@ -12,6 +12,7 @@ import org.example.expert.domain.todo.repository.TodoRepository;
 import org.example.expert.domain.user.entity.User;
 import org.example.expert.domain.user.enums.UserRole;
 import org.example.expert.domain.user.repository.UserRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +23,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -39,7 +41,8 @@ class ManagerServiceTest {
     private ManagerService managerService;
 
     @Test
-    public void findManagerByTodo_givenInvalidTodo_throwsInvalidRequestException() {
+    @DisplayName("유효하지 않은 todo의 메니저 검색 시 : InvalidRequestException throw")
+    public void getManagers_givenInvalidTodo_throwsInvalidRequestException() {
         // given
         long todoId = 1L;
         given(todoRepository.findById(todoId)).willReturn(Optional.empty());
@@ -50,6 +53,28 @@ class ManagerServiceTest {
     }
 
     @Test
+    @DisplayName("유효한 todo의 메니저 검색 시 : 매니저 목록 dto를 반환받음 ")
+    public void getManagers_withValidInput_returnManagerResponseList() {
+        // given
+        long todoId = 1L;
+        AuthUser authUser = new AuthUser(1L, "email", UserRole.USER);
+        User user = User.fromAuthUser(authUser);
+        Todo todo = new Todo("title", "contents", "weather", user);
+        Manager manager = new Manager(user, todo);
+
+        given(todoRepository.findById(todoId)).willReturn(Optional.of(todo));
+        given(managerRepository.findByTodoIdWithUser(todo.getId())).willReturn(List.of(manager));
+
+        // when
+        List<ManagerResponse> managerResponseList = managerService.getManagers(todoId);
+
+        // when & then
+        assertThat(managerResponseList).hasSize(1);
+        assertThat(managerResponseList.get(0).user().id()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("유저 저장 시 todo의 user가 null일 경우 : InvalidRequestException을 throw")
     void saveManager_givenTodoWithNullUser_throwsInvalidRequestException() {
         // given
         AuthUser authUser = new AuthUser(1L, "a@a.com", UserRole.USER);
