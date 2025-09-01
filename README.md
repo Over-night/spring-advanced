@@ -1,1 +1,17 @@
 # SPRING ADVANCED
+- git fork & clone
+    - 클론 후 .gitignore 설정에 따라 누락된 application.yml 적용
+    - 기존 코드의 jwt 호출 구문에 따라 properties 설정
+- 삭제 코드 복원
+    - WebConfig
+- 리펙터링
+    - early return
+    - if-else 최적화
+    - validation 적용
+    - @EntityGraph을 활용한 n+1 문제 해결
+    - dto record화 및 팩토리 메서드 추가
+    - for문의 stream화
+    - 외부 API 호출 트랜잭션에서 제외
+- 테스트코드 작성
+    - 테스트코드 리펙터링 및 커버리지를 충족시키는 모든 테스트코드 추가
+        - CommentService, ManagerService 한정
