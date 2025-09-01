@@ -24,11 +24,14 @@ public class TodoService {
     private final TodoRepository todoRepository;
     private final WeatherClient weatherClient;
 
-    @Transactional
     public TodoSaveResponse saveTodo(AuthUser authUser, TodoSaveRequest todoSaveRequest) {
-        User user = User.fromAuthUser(authUser);
+        final String weather = weatherClient.getTodayWeather();
+        return doSaveTodo(authUser, todoSaveRequest, weather);
+    }
 
-        String weather = weatherClient.getTodayWeather();
+    @Transactional
+    protected TodoSaveResponse doSaveTodo(AuthUser authUser, TodoSaveRequest todoSaveRequest, String weather) {
+        User user = User.fromAuthUser(authUser);
 
         Todo newTodo = new Todo(
                 todoSaveRequest.getTitle(),
@@ -38,14 +41,9 @@ public class TodoService {
         );
         Todo savedTodo = todoRepository.save(newTodo);
 
-        return new TodoSaveResponse(
-                savedTodo.getId(),
-                savedTodo.getTitle(),
-                savedTodo.getContents(),
-                weather,
-                new UserResponse(user.getId(), user.getEmail())
-        );
+        return TodoSaveResponse.of(savedTodo, weather, UserResponse.of(user));
     }
+
 
     @Transactional(readOnly = true)
     public Page<TodoResponse> getTodos(int page, int size) {
