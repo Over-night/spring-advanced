@@ -50,10 +50,7 @@ public class ManagerService {
         Manager newManagerUser = new Manager(managerUser, todo);
         Manager savedManagerUser = managerRepository.save(newManagerUser);
 
-        return new ManagerSaveResponse(
-                savedManagerUser.getId(),
-                new UserResponse(managerUser.getId(), managerUser.getEmail())
-        );
+        return ManagerSaveResponse.of(savedManagerUser, UserResponse.of(managerUser));
     }
 
     @Transactional(readOnly = true)
@@ -66,10 +63,7 @@ public class ManagerService {
         List<ManagerResponse> dtoList = new ArrayList<>();
         for (Manager manager : managerList) {
             User user = manager.getUser();
-            dtoList.add(new ManagerResponse(
-                    manager.getId(),
-                    new UserResponse(user.getId(), user.getEmail())
-            ));
+            dtoList.add(ManagerResponse.of(manager, UserResponse.of(user)));
         }
         return dtoList;
     }
