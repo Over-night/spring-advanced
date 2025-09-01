@@ -35,7 +35,7 @@ class CommentServiceTest {
     private CommentService commentService;
 
     @Test
-    public void createComment_givenInvalidTodo_throwsInvalidRequestException() {
+    public void saveComment_givenInvalidTodo_throwsInvalidRequestException() {
         // given
         long todoId = 1;
         CommentSaveRequest request = new CommentSaveRequest("contents");
@@ -53,7 +53,7 @@ class CommentServiceTest {
     }
 
     @Test
-    public void comment를_정상적으로_등록한다() {
+    public void saveComment_withValidInput_returnCommentSaveResponse() {
         // given
         long todoId = 1;
         CommentSaveRequest request = new CommentSaveRequest("contents");
