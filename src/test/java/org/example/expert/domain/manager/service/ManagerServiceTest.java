@@ -74,7 +74,7 @@ class ManagerServiceTest {
     }
 
     @Test
-    @DisplayName("유저 저장 시 todo의 user가 null일 경우 : InvalidRequestException을 throw")
+    @DisplayName("매니저 저장 시: todo의 user가 null일 경우 InvalidRequestException을 throw")
     void saveManager_givenTodoWithNullUser_throwsInvalidRequestException() {
         // given
         AuthUser authUser = new AuthUser(1L, "a@a.com", UserRole.USER);
@@ -95,6 +95,55 @@ class ManagerServiceTest {
 
         assertEquals("일정을 생성한 유저만 담당자를 지정할 수 있습니다.", exception.getMessage());
     }
+
+    @Test
+    @DisplayName("매니저 저장 시: todo의 user와 요청한 user가 다르면 InvalidRequestException을 throw")
+    void saveManager_givenTodoWithWrongUser_throwsInvalidRequestException() {
+        // given
+        AuthUser requestUser = new AuthUser(1L, "a@a.com", UserRole.USER);
+        AuthUser ownerUser = new AuthUser(2L, "b@b.com", UserRole.USER);
+        User owner = User.fromAuthUser(ownerUser);
+
+        long todoId = 1L;
+        long managerUserId = 3L;
+
+        Todo todo = new Todo("title", "contents", "weather", owner);
+        ManagerSaveRequest managerSaveRequest = new ManagerSaveRequest(managerUserId);
+
+        given(todoRepository.findById(todoId)).willReturn(Optional.of(todo));
+
+        // when & then
+        InvalidRequestException exception = assertThrows(InvalidRequestException.class, () ->
+                managerService.saveManager(requestUser, todoId, managerSaveRequest)
+        );
+
+        assertEquals("일정을 생성한 유저만 담당자를 지정할 수 있습니다.", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("매니저 저장 시: 작성자가 본인을 담당자로 등록 시 InvalidRequestException을 throw")
+    void saveManager_givenOwnerTriesToEntrySelf_throwsInvalidRequestException() {
+        // given
+        AuthUser ownerUser = new AuthUser(1L, "a@a.com", UserRole.USER);
+        User owner = User.fromAuthUser(ownerUser);
+
+        long todoId = 1L;
+        long managerUserId = 1L;
+
+        Todo todo = new Todo("title", "contents", "weather", owner);
+        ManagerSaveRequest managerSaveRequest = new ManagerSaveRequest(managerUserId);
+
+        given(todoRepository.findById(todoId)).willReturn(Optional.of(todo));
+        given(userRepository.findById(managerUserId)).willReturn(Optional.of(owner));
+
+        // when & then
+        InvalidRequestException exception = assertThrows(InvalidRequestException.class, () ->
+                managerService.saveManager(ownerUser, todoId, managerSaveRequest)
+        );
+
+        assertEquals("일정 작성자는 본인을 담당자로 등록할 수 없습니다.", exception.getMessage());
+    }
+
 
     @Test // 테스트코드 샘플
     public void manager_목록_조회에_성공한다() {
