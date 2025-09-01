@@ -39,11 +39,7 @@ public class CommentService {
 
         Comment savedComment = commentRepository.save(newComment);
 
-        return new CommentSaveResponse(
-                savedComment.getId(),
-                savedComment.getContents(),
-                new UserResponse(user.getId(), user.getEmail())
-        );
+        return CommentSaveResponse.of(savedComment, UserResponse.of(user));
     }
 
     @Transactional(readOnly = true)
@@ -53,11 +49,7 @@ public class CommentService {
         List<CommentResponse> dtoList = new ArrayList<>();
         for (Comment comment : commentList) {
             User user = comment.getUser();
-            CommentResponse dto = new CommentResponse(
-                    comment.getId(),
-                    comment.getContents(),
-                    new UserResponse(user.getId(), user.getEmail())
-            );
+            CommentResponse dto = CommentResponse.of(comment, UserResponse.of(user));
             dtoList.add(dto);
         }
         return dtoList;
